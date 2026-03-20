@@ -1,0 +1,20 @@
+# Unauthorised Web Browser Detected
+
+## What this detection looks for
+This detection will fire when a certain exe is detected. These exe's are known to be used with certain browsers so I have put some into a list that I think a company may want to block.
+
+## Why we should use this detection
+
+Use of unauthorised browsers could be indicative of a compromised account, if not, it still carries risks such as; vulnerabilities and exploits that the SOC are unaware of. This increases a companies attack surface and exposure. 
+
+Detection Logic (KQL):
+
+let browsers = dynamic(["brave.exe", "opera.exe", "vivaldi.exe"]);
+let browserInUse = (DeviceProcessEvents
+| where ActionType == "ProcessCreated"
+| where FileName has_any (browsers) or ProcessCommandLine has_any (browsers)
+| project TimeGenerated, AccountName, DeviceName, FileName, ProcessCommandLine);
+let browserInUse2 = (DeviceEvents
+| where FileName has_any (browsers) or ProcessCommandLine has_any (browsers)
+| project TimeGenerated, AccountName, DeviceName, FileName, ProcessCommandLine);
+union browserInUse, browserInUse2
