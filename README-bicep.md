@@ -17,11 +17,19 @@ This repository contains a Bicep file that configures and deploys a Microsoft Lo
 ## Depolyment Instructions
 
 Open PowerShell and connect to Azure using the following command:
+
 Connect-AzAccount // Note that you may need to select a Subscription if you have more than one.
+
 Once signed in, change the directory to where the lawSentinel.bicep file is saved and run the following command:
+
 New-AzResourceGroupDeployment -ResourceGroupName 'yourResourceGroupName' -TemplateFile 'lawSentinel.bicep'
+
 Next you will need to enter the following bits of information:
+
 logAnalyticsWorkspaceName:
+
 retentionDays:
+
 SKU: 
+
 You will then receive a message stating the Log Analytics Workspace's name, ID and Sentinel's name.
