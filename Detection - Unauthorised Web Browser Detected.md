@@ -13,12 +13,16 @@ Additionally, attackers may leverage non-standard browsers to evade detection, r
 
 Detection Logic (KQL):
 
-let browsers = dynamic(["brave.exe", "opera.exe", "vivaldi.exe"]);
-let browserInUse = (DeviceProcessEvents
+```kql
+let browsers = dynamic(["brave.exe", "opera.exe", "vivaldi.exe"]);      // Creates a list of browsers you want to be alerted on.
+
+let browserInUse = (DeviceProcessEvents      // Creates a function that searches the DeviceProcessEvents table for the browsers in the previously created list.
 | where ActionType == "ProcessCreated"
 | where FileName has_any (browsers) or ProcessCommandLine has_any (browsers)
 | project TimeGenerated, AccountName, DeviceName, FileName, ProcessCommandLine);
-let browserInUse2 = (DeviceEvents
+
+let browserInUse2 = (DeviceEvents      // Creates a function that seaches the DeviceEvents table for the browsers in the previously created list.
 | where FileName has_any (browsers) or ProcessCommandLine has_any (browsers)
 | project TimeGenerated, AccountName, DeviceName, FileName, ProcessCommandLine);
-union browserInUse, browserInUse2
+union browserInUse, browserInUse2      // Calls both the previously created functions to search for the browsers.
+```
