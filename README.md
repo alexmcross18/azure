@@ -1,2 +1,0 @@
-# azure
-All things Azure
