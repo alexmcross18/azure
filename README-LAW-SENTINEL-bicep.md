@@ -1,4 +1,4 @@
-# Log Analytics Workspace & Sentinel Depolyment using Bicep
+# Log Analytics Workspace & Sentinel Deployment using Bicep
 
 ## Overview
 
@@ -14,7 +14,7 @@ This repository contains a Bicep file that configures and deploys a Microsoft Lo
  - Have an account with the permissions to be able to create and modify Log Analytic Workspaces and Sentinel instances.
  - There is a Resource Group already created where you want these resources to go,
 
-## Depolyment Instructions
+## Deployment Instructions
 
 Open PowerShell and connect to Azure using the following command:
 
