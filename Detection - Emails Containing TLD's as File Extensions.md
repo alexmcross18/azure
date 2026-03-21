@@ -13,18 +13,18 @@ These domains blur the line between a file and a website, making it harder to te
 For example, an email with an attachment called "sheet1.zip" could be a scam created by criminals, directing a user to a malicious URL when clicked/opened.
 
 ```kql
-let knownSenders = dynamic([      // Creates a list of known/legit senders that may do this.
+let knownSenders = dynamic([            // Creates a list of known/legit senders that may do this.
 "knownSender1@domain.com",
 "knownSender2@domain.com",
 "knownSender3@domain.com"
 ]);
 EmailUrlInfo
-| where UrlDomain endswith ".zip" or UrlDomain endswith ".mov"
+| where UrlDomain endswith ".zip" or UrlDomain endswith ".mov"            // Searches for emails with url's that contain certain extensions.      
 | join EmailEvents on NetworkMessageId
-| where SenderFromAddress !in (knownSenders)
+| where SenderFromAddress !in (knownSenders)            // Checks that any emails found aren't from the known senders list.
 | where DeliveryAction =="Delivered"
-| where DeliveryLocation != "On-premises/external
-| extend SPF = split(AuthenticationDetails, ',')[0],
+| where DeliveryLocation != "On-premises/external            // Removes duplicate emails.
+| extend SPF = split(AuthenticationDetails, ',')[0],            // Pulls out SPF, DKIM and DMARC values and separates them.
     DKIM = split(AuthenticationDetails, ',')[1],
     DMARC = split(AuthenticationDetails, ',')[2]
 | project TimeGenerated, Url, Subject, UrlDomain, UrlLocation, SenderFromAddress, SenderMailAddress, RecipientEmailAddress, SenderIPv4, DeliveryLocation, SPF, DKIM, DMARC
