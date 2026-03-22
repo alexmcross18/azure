@@ -1,0 +1,154 @@
+param workflows_abroad_Working_Users_name string = 'abroad-Working-Users'
+param connections_azuremonitorlogs_externalid string = '/subscriptions/8ff5d0b8-bc7f-4b38-b0f1-7d4b69fadb6d/resourceGroups/sentinelrg/providers/Microsoft.Web/connections/azuremonitorlogs'
+param connections_outlook_externalid string = '/subscriptions/8ff5d0b8-bc7f-4b38-b0f1-7d4b69fadb6d/resourceGroups/sentinelrg/providers/Microsoft.Web/connections/outlook'
+
+resource workflows_abroad_Working_Users_name_resource 'Microsoft.Logic/workflows@2017-07-01' = {
+  name: workflows_abroad_Working_Users_name
+  location: 'eastus'
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    state: 'Enabled'
+    definition: {
+      '$schema': 'https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#'
+      contentVersion: '1.0.0.0'
+      parameters: {
+        '$connections': {
+          defaultValue: {}
+          type: 'Object'
+        }
+      }
+      triggers: {
+        Recurrence: {
+          recurrence: {
+            interval: 1
+            frequency: 'Month'
+            timeZone: 'GMT Standard Time'
+            startTime: '2026-04-01T01:00:00'
+          }
+          evaluatedRecurrence: {
+            interval: 1
+            frequency: 'Month'
+            timeZone: 'GMT Standard Time'
+            startTime: '2026-04-01T01:00:00'
+          }
+          type: 'Recurrence'
+          description: 'Run every month.'
+        }
+      }
+      actions: {
+        Run_query_and_list_results: {
+          runAfter: {}
+          type: 'ApiConnection'
+          inputs: {
+            host: {
+              connection: {
+                name: '@parameters(\'$connections\')[\'azuremonitorlogs\'][\'connectionId\']'
+              }
+            }
+            method: 'post'
+            body: 'SignInLogs\n| where TimeGenerated >= startofmonth(datetime_add(\'month\',-1, now()))\n| where TimeGenerated < startofmonth(now())\n| where Location != "GB"\n| where ResultType == "0"\n| extend deviceDetails = parse_json(DeviceDetail)\n| extend DeviceId = deviceDetails.deviceId,\n         OperatingSystem = deviceDetails.operatingSystem,\n         Browser = deviceDetails.browsers,\n         DeviceDisplayName = deviceDetails.displayName,\n         DeviceTrustType = deviceDetails.trustType,\n         DeviceCompliant = deviceDetails.isCompliant,\n         DeviceManaged = deviceDetails.isManaged\n| project TimeGenerated, Identity, IPAddress, Location, UserPrincipalName, DeviceId, OperatingSystem, Browser, DeviceDisplayName, DeviceTrustType, DeviceCompliant, DeviceManaged'
+            path: '/queryData'
+            queries: {
+              subscriptions: '8ff5d0b8-bc7f-4b38-b0f1-7d4b69fadb6d'
+              resourcegroups: 'sentinelrg'
+              resourcetype: 'Log Analytics Workspace'
+              resourcename: 'lawSentinel'
+              timerange: 'Set in query'
+            }
+          }
+        }
+        Create_CSV_table: {
+          runAfter: {
+            Run_query_and_list_results: [
+              'Succeeded'
+            ]
+          }
+          type: 'Table'
+          inputs: {
+            from: '@body(\'Run_query_and_list_results\')?[\'value\']'
+            format: 'CSV'
+          }
+        }
+        'Send_an_email_(V2)': {
+          runAfter: {
+            Run_query_and_list_results: [
+              'TimedOut'
+              'Skipped'
+              'Failed'
+            ]
+          }
+          type: 'ApiConnection'
+          inputs: {
+            host: {
+              connection: {
+                name: '@parameters(\'$connections\')[\'outlook\'][\'connectionId\']'
+              }
+            }
+            method: 'post'
+            body: {
+              To: 'email@email.com; otheremail@email.com'
+              Subject: 'Monthly abroad users Logic App run has failed'
+              Body: '<p class="editor-paragraph">Hi,</p><br><p class="editor-paragraph">This is an automated email to make you aware that the monthly scheduled run of the ${workflows_abroad_Working_Users_name} Logic App has failed.</p><br><p class="editor-paragraph">Please investigate this as soon as possible.</p>'
+              Importance: 'High'
+            }
+            path: '/v2/Mail'
+          }
+        }
+        'Send_an_email_(V2)_1': {
+          runAfter: {
+            Create_CSV_table: [
+              'Succeeded'
+            ]
+          }
+          type: 'ApiConnection'
+          inputs: {
+            host: {
+              connection: {
+                name: '@parameters(\'$connections\')[\'outlook\'][\'connectionId\']'
+              }
+            }
+            method: 'post'
+            body: {
+              To: 'email@email.com; otheremail@email.com'
+              Subject: 'Abroad working users'
+              Body: '<p class="editor-paragraph">Hi,</p><br><p class="editor-paragraph">This is the automated email containing a file with last months user sign in\'s from abroad.</p><br><p class="editor-paragraph">If you notice any issues with this please contact XXX.</p>'
+              Attachments: [
+                {
+                  Name: 'abroadWorkingUsers.csv'
+                  ContentBytes: '@base64(body(\'Create_CSV_table\'))'
+                }
+              ]
+              Importance: 'Normal'
+            }
+            path: '/v2/Mail'
+          }
+        }
+      }
+      outputs: {}
+    }
+    parameters: {
+      '$connections': {
+        value: {
+          azuremonitorlogs: {
+            id: '/subscriptions/8ff5d0b8-bc7f-4b38-b0f1-7d4b69fadb6d/providers/Microsoft.Web/locations/eastus/managedApis/azuremonitorlogs'
+            connectionId: connections_azuremonitorlogs_externalid
+            connectionName: 'azuremonitorlogs'
+            connectionProperties: {
+              authentication: {
+                type: 'ManagedServiceIdentity'
+              }
+            }
+          }
+          outlook: {
+            id: '/subscriptions/8ff5d0b8-bc7f-4b38-b0f1-7d4b69fadb6d/providers/Microsoft.Web/locations/eastus/managedApis/outlook'
+            connectionId: connections_outlook_externalid
+            connectionName: 'outlook'
+            connectionProperties: {}
+          }
+        }
+      }
+    }
+  }
+}
