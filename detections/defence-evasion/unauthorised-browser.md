@@ -14,15 +14,33 @@ Additionally, attackers may leverage non-standard browsers to evade detection, r
 Detection Logic (KQL):
 
 ```kql
-let browsers = dynamic(["brave.exe", "opera.exe", "vivaldi.exe"]);      // Creates a list of browsers you want to be alerted on.
-
-let browserInUse = (DeviceProcessEvents      // Creates a function that searches the DeviceProcessEvents table for the browsers in the previously created list.
-| where ActionType == "ProcessCreated"
-| where FileName has_any (browsers) or ProcessCommandLine has_any (browsers)
-| project TimeGenerated, AccountName, DeviceName, FileName, ProcessCommandLine);
-
-let browserInUse2 = (DeviceEvents      // Creates a function that seaches the DeviceEvents table for the browsers in the previously created list.
-| where FileName has_any (browsers) or ProcessCommandLine has_any (browsers)
-| project TimeGenerated, AccountName, DeviceName, FileName, ProcessCommandLine);
-union browserInUse, browserInUse2      // Calls both the previously created functions to search for the browsers.
+// Creates a list of browsers you want to be alerted on.
+let browsers = dynamic(["browser1.exe", "browser2.exe", "browser3.exe"]);
+// Looks for a browser being opened in the DeviceProcessEvents table.
+let BrowserProcessEvents = DeviceProcessEvents
+| where FileName has_any (browsers)
+    or ProcessCommandLine has_any (browsers)
+| extend DetectionSource = "DeviceProcessEvents"
+| project TimeGenerated, DeviceName, AccountName, DetectionSource, FileName, ProcessCommandLine, FolderPath, SHA256, InitiatingProcessFileName, InitiatingProcessCommandLine;
+// Looks for a browser being opened in the DeviceEvents table.
+let BrowserDeviceEvents = DeviceEvents
+| where FileName has_any (browsers)
+    or ProcessCommandLine has_any (browsers)
+| extend DetectionSource = "DeviceEvents"
+| project TimeGenerated, DeviceName, AccountName, DetectionSource, FileName, ProcessCommandLine, FolderPath, SHA256, InitiatingProcessFileName, InitiatingProcessCommandLine;
+// Looks for a browser being opened in the DeviceNetworkEvents table.
+let BrowserNetworkEvents = DeviceNetworkEvents
+| where InitiatingProcessFileName has_any (browsers)
+| extend DetectionSource = "DeviceNetworkEvents"
+| project TimeGenerated, DeviceName, DetectionSource, InitiatingProcessAccountName, InitiatingProcessFileName, InitiatingProcessCommandLine;
+// Summarizes the results.
+BrowserProcessEvents
+| union BrowserDeviceEvents
+| union BrowserNetworkEvents
+| summarize 
+    FirstSeen = min(TimeGenerated),
+    LastSeen = max(TimeGenerated),
+    EventCount = count()
+    by DeviceName, AccountName, FileName, SHA256, InitiatingProcessFileName
+| sort by LastSeen desc
 ```
