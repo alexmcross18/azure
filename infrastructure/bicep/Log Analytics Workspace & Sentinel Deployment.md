@@ -22,10 +22,10 @@ Open PowerShell and connect to Azure using the following command:
 Connect-AzAccount // Note that you may need to select a Subscription if you have more than one.
 ```
 
-Once signed in, change the directory to where the lawSentinel.bicep file is saved and run the following command:
+Once signed in, change the directory to where the .bicep file is saved and run the following command:
 
 ```powershell
-New-AzResourceGroupDeployment -ResourceGroupName 'yourResourceGroupName' -TemplateFile 'lawSentinel.bicep'
+New-AzResourceGroupDeployment -ResourceGroupName 'yourResourceGroupName' -TemplateFile 'file-name.bicep'
 ```
 
 Next you will need to enter the following bits of information:
