@@ -1,15 +1,38 @@
-let knownSenders = dynamic([            // Creates a list of known/legit senders that may do this.
+// Creates a list of known/legit senders that may do this.
+let knownSenders = dynamic([
 "knownSender1@domain.com",
 "knownSender2@domain.com",
 "knownSender3@domain.com"
 ]);
+// Creates a list of abusable TLDs.
+let suspiciousTLDs = dynamic([
+    ".zip", ".mov", ".cfd", ".quest", ".cam", ".fin", ".llc", ".vip", ".gq", ".tk"
+]);
+// Searches the EmailUrlInfo table for emails that contain domains that end in one of the suspiciousTLDs.
 EmailUrlInfo
-| where UrlDomain endswith ".zip" or UrlDomain endswith ".mov"            // Searches for emails with url's that contain certain extensions.      
-| join EmailEvents on NetworkMessageId
-| where SenderFromAddress !in (knownSenders)            // Checks that any emails found aren't from the known senders list.
-| where DeliveryAction =="Delivered"
-| where DeliveryLocation != "On-premises/external"   // Removes duplicate emails.
-| extend SPF = split(AuthenticationDetails, ',')[0],            // Pulls out SPF, DKIM and DMARC values and separates them.
-    DKIM = split(AuthenticationDetails, ',')[1],
-    DMARC = split(AuthenticationDetails, ',')[2]
-| project TimeGenerated, Url, Subject, UrlDomain, UrlLocation, SenderFromAddress, SenderMailAddress, RecipientEmailAddress, SenderIPv4, DeliveryLocation, SPF, DKIM, DMARC
+| where UrlDomain has_any (suspiciousTLDs)
+// Enriches the filtered EmailUrlInfo results with email metadata from EmailEvents, joined on the NetworkMessageId.
+| join kind=leftouter EmailEvents on NetworkMessageId
+// Enrich results with click data from UrlClickEvents to determine if and when a recipient clicked the suspicious URL on NetworkMessageId.
+| join kind=leftouter (
+    UrlClickEvents
+    | project NetworkMessageId, TimeGenerated, ClickAction=ActionType, ClickUser=AccountUpn, IsClickedThrough, ThreatTypes, ClickIP=IPAddress
+) on NetworkMessageId
+// Excludes known senders.
+| where SenderFromAddress !in (knownSenders)
+// Only delivered mail.
+| where DeliveryAction == "Delivered"
+// Removes duplicates from on-prem Exchange server.
+| where DeliveryLocation != "On-premises/external"
+// Parses SPF, DKIM and DMARC into their own rows to make them easier to see.
+| extend SPF = split(AuthenticationDetails, ',')[0],
+         DKIM = split(AuthenticationDetails, ',')[1],
+         DMARC = split(AuthenticationDetails, ',')[2]
+// Count how many recipients got the same message.
+| join kind=leftouter (
+    EmailEvents
+    | summarize RecipientCount = dcount(RecipientEmailAddress) by NetworkMessageId
+) on NetworkMessageId
+// Final output
+| project TimeGenerated, Subject, Url, UrlDomain, UrlLocation, SenderFromAddress, RecipientEmailAddress, RecipientCount,  SenderIPv4,  DeliveryLocation, ClickAction,  SPF, DKIM, DMARC
+| order by TimeGenerated desc 
