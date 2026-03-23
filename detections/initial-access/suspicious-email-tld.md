@@ -2,15 +2,33 @@
 
 ## What this detection is looking for
 
-This detection looks for emails with links/URLS's that have certain extensions at the end that may make it appear to be a file. 
+This detection identifies delivered emails containing URLs where the domain uses a suspicious top-level domain (TLD) such as .zip, .mov, .cfd, .quest, .cam, .fin, .llc, .vip, .gq, or .tk.
 
 ## Why this detection is useful
 
-Criminals are using ".zip" domains, which are top-level-domains (TLD's) that mimic the names of big tech companies.
+Attackers abuse TLDs that mimic common file extensions or are frequently used in malicious infrastructure. For example, a .zip or .mov domain can blur the line between a file and a website, tricking users into thinking they are opening a file attachment when they are actually visiting a malicious URL.
+This detection goes beyond simply flagging suspicious URLs by also identifying:
 
-These domains blur the line between a file and a website, making it harder to tell the difference.
+Whether the email failed SPF, DKIM, and DMARC authentication checks, indicating possible spoofing.
+Whether any recipient actually clicked the link.
+How many recipients received the same email, helping identify mass phishing campaigns.
 
-For example, an email with an attachment called "sheet1.zip" could be a scam created by criminals, directing a user to a malicious URL when clicked/opened.
+## Dependencies
+
+This detection relies on Microsoft Defender for Office 365 and queries the following Advanced Hunting tables:
+
+```EmailUrlInfo``` — URL data extracted from emails.
+
+```EmailEvents``` — Email metadata including sender, recipient, and delivery info.
+
+```UrlClickEvents``` — Click data from Safe Links.
+
+
+Note: ```UrlClickEvents``` will only contain data if Safe Links is enabled in your Defender for Office 365 policy. Without it, click detection will not function.
+
+## Tuning
+
+Add trusted senders to the ```knownSenders``` allowlist at the top of the query to reduce false positives.
 
 ```kql
 // Creates a list of known/legit senders that may do this.
