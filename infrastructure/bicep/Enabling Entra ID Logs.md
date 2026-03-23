@@ -1,6 +1,6 @@
-# Azure AD Diagnostic Settings — Bicep
+# Enabling Entra ID Logs
  
-This Bicep template configures **Azure Active Directory Diagnostic Settings** at the tenant scope, forwarding AAD logs to a Log Analytics Workspace (e.g. Microsoft Sentinel).
+This Bicep template configures **Entra ID Logs (Diagnostic Settings)** at the tenant scope, forwarding Entra ID logs to a Log Analytics Workspace and Microsoft Sentinel.
  
 ---
  
@@ -13,7 +13,7 @@ The template deploys a `microsoft.aadiam/diagnosticSettings` resource that enabl
 ## Prerequisites
  
 - Azure CLI or PowerShell with Bicep support
-- Permissions to deploy at **tenant scope** (`Global Administrator` or `Privileged Role Administrator`)
+- Permissions to deploy at **tenant scope** (`Global Administrator`)
 - An existing Log Analytics Workspace
  
 ---
@@ -48,31 +48,19 @@ Before deploying, update the `lawResourceId` parameter in the template (or pass 
 param lawResourceId string = '/subscriptions/<subscription-id>/resourceGroups/<rg-name>/providers/Microsoft.OperationalInsights/workspaces/<workspace-name>'
 ```
  
-### 2. Deploy via Azure CLI
- 
-Because this template targets **tenant scope**, it must be deployed with the `--management-group` or tenant-level scope flag:
- 
-```bash
-az deployment tenant create \
-  --location uksouth \
-  --template-file main.bicep
-```
- 
-To override a parameter at deploy time:
- 
-```bash
-az deployment tenant create \
-  --location uksouth \
-  --template-file main.bicep \
-  --parameters lawResourceId='/subscriptions/<id>/resourceGroups/<rg>/providers/Microsoft.OperationalInsights/workspaces/<name>'
-```
- 
-### 3. Deploy via PowerShell
+### 2. Deploy via PowerShell - Service Principal
  
 ```powershell
-New-AzTenantDeployment `
-  -Location "uksouth" `
-  -TemplateFile "./main.bicep"
+$tenantId = "your-tenant-id"
+$appId = "your-service-principal-id"
+$secret = "your-secret-value"
+
+$secureSecret = ConvertTo-SecureString $secret -AsPlainText -Force
+$credential = New-Object System.Management.Automation.PSCredential($appId, $secureSecret)
+
+Connect-AzAccount -ServicePrincipal -TenantId $tenantId -Credential $credential -Verbose
+
+New-AzTenantDeployment -Location "your-location" -TemplateFile "C:\saved-location\file-name.bicep"
 ```
  
 ---
