@@ -116,9 +116,9 @@ The following files are included for deployment:
  
 | File | Description |
 |---|---|
-| [users-working-abroad.json](.\users-working-abroad.json) | Logic App workflow definition (portal export) |
-| [ARM-template-users-working-abroad.json](.\ARM-template-users-working-abroad.json) | ARM template for full deployment |
-| [users-working-abroad.bicep](.\users-working-abroad.bicep) | Bicep version of the ARM template |
+| [users-working-abroad.json](users-working-abroad.json) | Logic App workflow definition (portal export) |
+| [ARM-template-users-working-abroad.json](ARM-template-users-working-abroad.json) | ARM template for full deployment |
+| [users-working-abroad.bicep](users-working-abroad.bicep) | Bicep version of the ARM template |
  
 Before deploying, update the following values in your chosen template:
  
