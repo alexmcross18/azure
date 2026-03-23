@@ -9,7 +9,7 @@ It demonstrates hands-on experience with Microsoft Sentinel, KQL-based detection
 ### azure/detections/tactic/
 
 Each detection is put in the most relevant MITRE ATT&CK tactic folder.
-Contains custom KQL-based detection rules developed for Microsoft Sentinel.
+Contains custom KQL-based detection rules developed for Microsoft Sentinel and a README.
 Each detection is designed with a focus on real-world attack scenarios and includes supporting context such as purpose, logic, and expected outcomes.
 
 ### infrastructure/
