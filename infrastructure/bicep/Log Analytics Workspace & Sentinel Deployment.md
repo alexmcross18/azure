@@ -44,4 +44,4 @@ SKU:
 
 You will then receive a message stating the Log Analytics Workspace's name, ID and Sentinel's name.
 
-[View the Bicep template](./Log%20Analytics%20Workspace%20&%20Sentinel%20Deployment.bicep)
+[View the Bicep template here](./Log%20Analytics%20Workspace%20&%20Sentinel%20Deployment.bicep)
