@@ -92,4 +92,4 @@ The following AAD log categories are configured by this template:
 - The `targetScope` is set to `'tenant'`, which requires elevated permissions to deploy.
 - This template is idempotent — redeploying will update the existing diagnostic settings resource in place.
 
-[View the Bicep file here](./Enabling%20Entra%20ID%20Logs.bicep)
+[View the Bicep template here](./Enabling%20Entra%20ID%20Logs.bicep)
