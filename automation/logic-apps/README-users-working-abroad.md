@@ -27,20 +27,20 @@ Built to reduce manual reporting effort and provide consistent visibility into f
 ## Flow Diagram
  
 ```
-Recurrence Trigger (1st of month, 01:00 AM GMT)
+Recurrence Trigger
         │
         ▼
-Run KQL Query (SignInLogs — previous month, non-GB, successful)
+Run KQL Query
         │
    ┌────┴────┐
 Succeeded   Failed / Timed Out / Skipped
    │                    │
    ▼                    ▼
 Create CSV        Send failure alert email
-   │              (High importance)
+   │              
    ▼
-Send report email
-(CSV attached)
+Send report email with csv
+
 ```
  
 ---
