@@ -34,10 +34,10 @@
                     "body": "SignInLogs\n| where TimeGenerated >= startofmonth(datetime_add('month',-1, now()))\n| where TimeGenerated < startofmonth(now())\n| where Location != \"GB\"\n| where ResultType == \"0\"\n| extend deviceDetails = parse_json(DeviceDetail)\n| extend DeviceId = deviceDetails.deviceId,\n         OperatingSystem = deviceDetails.operatingSystem,\n         Browser = deviceDetails.browsers,\n         DeviceDisplayName = deviceDetails.displayName,\n         DeviceTrustType = deviceDetails.trustType,\n         DeviceCompliant = deviceDetails.isCompliant,\n         DeviceManaged = deviceDetails.isManaged\n| project TimeGenerated, Identity, IPAddress, Location, UserPrincipalName, DeviceId, OperatingSystem, Browser, DeviceDisplayName, DeviceTrustType, DeviceCompliant, DeviceManaged",
                     "path": "/queryData",
                     "queries": {
-                        "subscriptions": "8ff5d0b8-bc7f-4b38-b0f1-7d4b69fadb6d",
-                        "resourcegroups": "sentinelrg",
+                        "subscriptions": "your-subscription-id",
+                        "resourcegroups": "your-resource-group-name",
                         "resourcetype": "Log Analytics Workspace",
-                        "resourcename": "lawSentinel",
+                        "resourcename": "your-law-name",
                         "timerange": "Set in query"
                     }
                 }
@@ -122,8 +122,8 @@
             "type": "Object",
             "value": {
                 "azuremonitorlogs": {
-                    "id": "/subscriptions/8ff5d0b8-bc7f-4b38-b0f1-7d4b69fadb6d/providers/Microsoft.Web/locations/eastus/managedApis/azuremonitorlogs",
-                    "connectionId": "/subscriptions/8ff5d0b8-bc7f-4b38-b0f1-7d4b69fadb6d/resourceGroups/sentinelrg/providers/Microsoft.Web/connections/azuremonitorlogs",
+                    "id": "/subscriptions/your-subscription-id/providers/Microsoft.Web/locations/eastus/managedApis/azuremonitorlogs",
+                    "connectionId": "/subscriptions/your-subscription-id/resourceGroups/your-resource-group-name/providers/Microsoft.Web/connections/azuremonitorlogs",
                     "connectionName": "azuremonitorlogs",
                     "connectionProperties": {
                         "authentication": {
@@ -132,8 +132,8 @@
                     }
                 },
                 "outlook": {
-                    "id": "/subscriptions/8ff5d0b8-bc7f-4b38-b0f1-7d4b69fadb6d/providers/Microsoft.Web/locations/eastus/managedApis/outlook",
-                    "connectionId": "/subscriptions/8ff5d0b8-bc7f-4b38-b0f1-7d4b69fadb6d/resourceGroups/sentinelrg/providers/Microsoft.Web/connections/outlook",
+                    "id": "/subscriptions/your-subscription-id/providers/Microsoft.Web/locations/eastus/managedApis/outlook",
+                    "connectionId": "/subscriptions/your-subscription-id/resourceGroups/your-resource-group-name/providers/Microsoft.Web/connections/outlook",
                     "connectionName": "outlook",
                     "connectionProperties": {}
                 }
