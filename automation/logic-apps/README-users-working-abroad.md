@@ -105,7 +105,6 @@ A CSV file (`abroadWorkingUsers.csv`) delivered via email containing:
 - Azure Logic App (Consumption or Standard)
 - System-assigned managed identity enabled on the Logic App
 - Log Analytics Workspace with `SignInLogs` ingested (requires Microsoft Entra ID diagnostic settings)
-- Microsoft Sentinel enabled on the workspace
 - Outlook connection authorised with a licensed Microsoft 365 account
  
 ---
