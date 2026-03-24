@@ -19,6 +19,10 @@ Each detection is designed with a focus on real-world attack scenarios and inclu
 Infrastructure-as-code templates used to deploy and configure Azure resources.
 Includes supporting documentation and deployment guidance.
 
+Currently I have written two .bicep scripts, one to configure and deploy a **Log Analytics Workspace** and link a **Sentinel** instance.
+
+The other is to enable multiple **Entra ID logs** and parse, into a **Log Analytics Workspace** and **Sentinel**.
+
 ## Goals
 
 - Build and maintain production-style detection logic
