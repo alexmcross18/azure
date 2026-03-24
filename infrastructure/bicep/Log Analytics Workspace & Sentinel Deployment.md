@@ -12,7 +12,7 @@ This repository contains a Bicep file that configures and deploys a Microsoft Lo
  ## Prerequisites
  - Have Azure PowerShell installed.
  - Have an account with the permissions to be able to create and modify Log Analytic Workspaces and Sentinel instances.
- - There is a Resource Group already created where you want these resources to go,
+ - There is a Resource Group already created where you want these resources to go.
 
 ## Deployment Instructions
 
