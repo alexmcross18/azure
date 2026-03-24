@@ -2,7 +2,7 @@
  
 ## Overview
  
-A scheduled Azure Logic App that queries Microsoft Sentinel for successful sign-ins from outside the United Kingdom during the previous calendar month, exports the results as a CSV, and distributes them to a defined recipient list via email.
+A scheduled Azure Logic App that queries a Log Analytics Workspace for successful sign-ins from outside the United Kingdom during the previous calendar month, exports the results as a CSV, and distributes them to a defined recipient list via email.
  
 Built to reduce manual reporting effort and provide consistent visibility into foreign access activity across the environment.
  
