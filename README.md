@@ -19,10 +19,6 @@ Each detection is designed with a focus on real-world attack scenarios and inclu
 Infrastructure-as-code templates used to deploy and configure Azure resources.
 Includes supporting documentation and deployment guidance.
 
-### diagrams/
-
-Architecture diagrams illustrating the design and layout of my personal Azure environment, why it is configured that way and what each one does.
-
 ## Goals
 
 - Build and maintain production-style detection logic
