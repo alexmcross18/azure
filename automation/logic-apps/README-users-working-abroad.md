@@ -93,7 +93,7 @@ A CSV file (`abroadWorkingUsers.csv`) delivered via email containing:
  
 | Connector | Purpose | Authentication |
 |---|---|---|
-| Azure Monitor Logs | Query Microsoft Sentinel / Log Analytics | Managed Identity |
+| Azure Monitor Logs | Query Log Analytics Workspace | Managed Identity |
 | Outlook | Send report and failure alert emails | OAuth |
  
 > **Note:** The Azure Monitor Logs connector uses a system-assigned managed identity. The identity must be granted **Log Analytics Reader** on the target Log Analytics Workspace and **Reader** at the subscription scope.
