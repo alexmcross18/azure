@@ -1,6 +1,6 @@
 param workflows_abroad_Working_Users_name string = 'abroad-Working-Users'
-param connections_azuremonitorlogs_externalid string = '/subscriptions/8ff5d0b8-bc7f-4b38-b0f1-7d4b69fadb6d/resourceGroups/sentinelrg/providers/Microsoft.Web/connections/azuremonitorlogs'
-param connections_outlook_externalid string = '/subscriptions/8ff5d0b8-bc7f-4b38-b0f1-7d4b69fadb6d/resourceGroups/sentinelrg/providers/Microsoft.Web/connections/outlook'
+param connections_azuremonitorlogs_externalid string = '/subscriptions/your-subscription-id/resourceGroups/your-resource-group-name/providers/Microsoft.Web/connections/azuremonitorlogs'
+param connections_outlook_externalid string = '/subscriptions/your-subscription-id/resourceGroups/your-resource-group-name/providers/Microsoft.Web/connections/outlook'
 
 resource workflows_abroad_Working_Users_name_resource 'Microsoft.Logic/workflows@2017-07-01' = {
   name: workflows_abroad_Working_Users_name
@@ -51,10 +51,10 @@ resource workflows_abroad_Working_Users_name_resource 'Microsoft.Logic/workflows
             body: 'SignInLogs\n| where TimeGenerated >= startofmonth(datetime_add(\'month\',-1, now()))\n| where TimeGenerated < startofmonth(now())\n| where Location != "GB"\n| where ResultType == "0"\n| extend deviceDetails = parse_json(DeviceDetail)\n| extend DeviceId = deviceDetails.deviceId,\n         OperatingSystem = deviceDetails.operatingSystem,\n         Browser = deviceDetails.browsers,\n         DeviceDisplayName = deviceDetails.displayName,\n         DeviceTrustType = deviceDetails.trustType,\n         DeviceCompliant = deviceDetails.isCompliant,\n         DeviceManaged = deviceDetails.isManaged\n| project TimeGenerated, Identity, IPAddress, Location, UserPrincipalName, DeviceId, OperatingSystem, Browser, DeviceDisplayName, DeviceTrustType, DeviceCompliant, DeviceManaged'
             path: '/queryData'
             queries: {
-              subscriptions: '8ff5d0b8-bc7f-4b38-b0f1-7d4b69fadb6d'
-              resourcegroups: 'sentinelrg'
+              subscriptions: 'your-subscription-id'
+              resourcegroups: 'your-resource-group-name'
               resourcetype: 'Log Analytics Workspace'
-              resourcename: 'lawSentinel'
+              resourcename: 'your-law-name'
               timerange: 'Set in query'
             }
           }
@@ -132,7 +132,7 @@ resource workflows_abroad_Working_Users_name_resource 'Microsoft.Logic/workflows
       '$connections': {
         value: {
           azuremonitorlogs: {
-            id: '/subscriptions/8ff5d0b8-bc7f-4b38-b0f1-7d4b69fadb6d/providers/Microsoft.Web/locations/eastus/managedApis/azuremonitorlogs'
+            id: '/subscriptions/your-subscription-id/providers/Microsoft.Web/locations/eastus/managedApis/azuremonitorlogs'
             connectionId: connections_azuremonitorlogs_externalid
             connectionName: 'azuremonitorlogs'
             connectionProperties: {
@@ -142,7 +142,7 @@ resource workflows_abroad_Working_Users_name_resource 'Microsoft.Logic/workflows
             }
           }
           outlook: {
-            id: '/subscriptions/8ff5d0b8-bc7f-4b38-b0f1-7d4b69fadb6d/providers/Microsoft.Web/locations/eastus/managedApis/outlook'
+            id: '/subscriptions/your-subscription-id/providers/Microsoft.Web/locations/eastus/managedApis/outlook'
             connectionId: connections_outlook_externalid
             connectionName: 'outlook'
             connectionProperties: {}
