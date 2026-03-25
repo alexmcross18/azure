@@ -9,9 +9,9 @@ AuditLogs
 | extend TargetUser = tostring(TargetResources[0].userPrincipalName)
 // Pulls out the role name into it's own row.
 | extend RoleName = tostring(TargetResources[0].modifiedProperties[1].newValue)
+// Tunes for false positives in case the initiating user and target user fields fail to parse correctly and appear blank.
+| where isnotempty(InitiatingUser) and isnotempty(TargetUser)
 // Filters on only logs where the initiating user is the same as the target user.
 | where InitiatingUser == TargetUser
-// Tunes for false positives in case the initiating user and target user fields fail to parse correctly and appear blank.
-| where isnotempty( InitiatingUser) and isnotempty( TargetUser)
 // Projects relevant information.
 | project TimeGenerated, OperationName, InitiatingUser, TargetUser, Result, RoleName
