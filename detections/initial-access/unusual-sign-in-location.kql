@@ -1,0 +1,28 @@
+// Define a list of known/approved country codes from the Sentinel watchlist "knownLocations".
+let knownLocations = (_GetWatchlist('knownLocations') | project CountryCode);
+// Build a lookup of each user's last successful sign-in from a known location in the last 30 days.
+let lastKnownLocation = SigninLogs
+| where ResultSignature == "SUCCESS"
+| where Location in (knownLocations)
+| where TimeGenerated > ago(30d)
+| summarize LastKnownSignInTime = max(TimeGenerated) by UserPrincipalName, LastKnownLocation = Location;
+SigninLogs
+// Only include sign-ins from locations NOT in the known locations watchlist.
+| where Location !in (knownLocations)
+// Only include successful sign-ins.
+| where ResultSignature == "SUCCESS"
+// Return only the relevant columns.
+| project
+    TimeGenerated,
+    Identity,
+    UserDisplayName,
+    UserPrincipalName,
+    UserType,
+    Location,
+    AppDisplayName,
+    AuthenticationRequirement,
+    ClientAppUsed,
+    ConditionalAccessStatus,
+    IsInteractive,
+    IPAddress,
+    LocationDetails
