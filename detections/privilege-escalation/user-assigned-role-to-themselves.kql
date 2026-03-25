@@ -1,0 +1,9 @@
+AuditLogs
+| where Result == "success"
+| where OperationName == "Add member to role"
+| extend InitiatingUser = tostring(InitiatedBy.user.userPrincipalName)
+| extend TargetUser = tostring(TargetResources[0].userPrincipalName)
+| extend RoleName = tostring(TargetResources[0].modifiedProperties[1].newValue)
+| where InitiatingUser == TargetUser
+| where isnotempty( InitiatingUser) and isnotempty( TargetUser)
+| project TimeGenerated, OperationName, InitiatingUser, TargetUser, Result, RoleName
