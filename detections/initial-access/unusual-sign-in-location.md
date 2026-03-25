@@ -1,18 +1,31 @@
-# Successful Sign In from Unusual Location.
+# Successful sign-in from Unusual Location.
 
 ## What this detection is looking for
 
-This detection identifies successful sign in's from locations, specifically CountryCode's that aren't icluded in a specific watchlist.
+This detection identifies successful sign-ins from locations, specifically CountryCode's that aren't included in a specific watchlist.
 
 ## Why this detection is useful
 
-This can catch attackers who have gained access to a compromised account as soon as they sign in. This gives the SOC team a good head start to start investigating and containing the threat before they have a chance to attack. 
+This can catch attackers who have gained access to a compromised account as soon as they sign-in. This gives the SOC team a good head start to start investigating and containing the threat before they have a chance to attack. 
 
 ## Dependencies
 
-This detection relies on the SignInLogs diagnostic setting being enabled in Entra ID and parsed into the Log Analytics Workspace that your Sentinel instance is attached too.
+This detection relies on the SignInLogs diagnostic setting being enabled in Entra ID and parsed into the Log Analytics Workspace that your Sentinel instance is attached to.
 
-Aswell as a watchlist being created in Sentinel and updated with the relevant information including the SearchKey being the CountryCode.
+As well as a watchlist being created in Sentinel, with a column called "CountryCode" and updated with the relevant information including the SearchKey being the CountryCode.
+
+## False Positive Guidance
+
+The investigating SOC should start with ruling out the below:
+
+- VPN usage
+- Working from abroad
+
+## MITRE ATT&CK Mapping
+
+Tactic - **Initial Access**
+
+Technique - **T1078 - Valid Accounts**
 
 ## Tuning
 
