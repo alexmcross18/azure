@@ -11,6 +11,12 @@ The use of unauthorised browsers can indicate attempts to bypass security contro
 
 Additionally, attackers may leverage non-standard browsers to evade detection, reduce visibility, or access corporate resources from unmanaged contexts.
 
+## MITRE ATT&CK Mapping
+
+Tactic - **Defence-Evasion**
+
+Technique - **T1548.002 - Bypass User Account Control**
+
 Detection Logic (KQL):
 
 ```kql
