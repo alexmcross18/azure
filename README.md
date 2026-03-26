@@ -6,7 +6,7 @@
 
 ## What This Repository Is
 
-This repo serves two purposes. First, it's a structured library of detection logic, each rule documented with its threat context, MITRE mapping, dependencies, and tuning guidance — the kind of detail that matters when you're handing a detection off to another analyst or justifying an alert to a stakeholder. Second, it's a collection of reusable Azure infrastructure templates for standing up and configuring the Microsoft Sentinel stack from scratch.
+This repo serves two purposes. First, it's a structured library of detection logic, each rule documented with its threat context, MITRE mapping, dependencies, and tuning guidance — the kind of detail that matters when you're handing a detection off to another analyst or justifying an alert to a stakeholder. Second, it's a collection of reusable Azure infrastructure templates for standing up and configuring the Azure and Sentinel stacks from scratch.
 
 Nothing here requires a CI/CD pipeline to use. Every file is designed to be understandable, deployable, and adaptable on its own.
 
@@ -55,7 +55,7 @@ Each detection is organised by MITRE ATT&CK tactic and ships as a pair: a `.kql`
 
 ### Unauthorised Web Browsers
 **Path:** `detections/defence-evasion/`  
-**MITRE:** Defense Evasion — T1548.002
+**MITRE:** Defense Evasion — T1564
 
 Detects the execution of browsers not approved by the organisation across three MDE tables — `DeviceProcessEvents`, `DeviceEvents`, and `DeviceNetworkEvents` — then unions the results and summarises by device and account, with first/last seen timestamps and an event count. Covering three tables closes the gap where a browser might be launched in a way that only appears in one of them.
 
@@ -172,7 +172,6 @@ SignInLogs
 | where Location != "GB"
 | where ResultType == "0"
 | extend deviceDetails = parse_json(DeviceDetail)
-...
 | project TimeGenerated, Identity, IPAddress, Location, UserPrincipalName,
           DeviceId, OperatingSystem, Browser, DeviceDisplayName,
           DeviceTrustType, DeviceCompliant, DeviceManaged
@@ -229,7 +228,7 @@ Before deploying, update subscription ID, resource group name, Log Analytics Wor
 
 ## Relationship to the CI/CD Pipeline Repo
 
-The detections in this repository have been exported as ARM templates and deployed into Microsoft Sentinel via the [infrastructure-and-detection-as-code-CI-CD-pipeline](https://github.com/your-username/infrastructure-and-detection-as-code-CI-CD-pipeline) repo. That repo handles automated deployment, version control, and multi-client targeting. This repo is where the detection logic itself is written, documented, and maintained.
+The resources have been kept as .bicep files (Log Analytics Workspace & Sentinel) and detections in this repository have been exported as ARM templates (policies, detections etc) and deployed into Azure and Sentinel via the [infrastructure-and-detection-as-code-CI-CD-pipeline](https://github.com/alexmcross18/infrastructure-and-detection-as-code-CI-CD-pipeline) repo. That repo handles automated deployment, version control, and multi-client targeting. This repo is where the resources and detection logic itself is written, documented, and maintained.
 
 ---
 
