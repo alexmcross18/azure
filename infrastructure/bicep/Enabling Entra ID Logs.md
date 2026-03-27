@@ -87,7 +87,8 @@ The following AAD log categories are configured by this template:
 ---
  
 ## Notes
- 
+
+- Running this multiple times will NOT create duplicate Diagnostic Settings in Entra ID as long as you don't change the name of the setting in the file.
 - All log categories are **enabled by default**. Set any parameter to `false` to disable a specific category.
 - The `targetScope` is set to `'tenant'`, which requires elevated permissions to deploy.
 - This template is idempotent — redeploying will update the existing diagnostic settings resource in place.
