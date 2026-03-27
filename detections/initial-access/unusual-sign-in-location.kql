@@ -11,6 +11,8 @@ SigninLogs
 | where Location !in (knownLocations)
 // Only include successful sign-ins.
 | where ResultSignature == "SUCCESS"
+// Enrich with the user's last known good location and when they were last seen there.
+| join kind=leftouter lastKnownLocation on UserPrincipalName
 // Return only the relevant columns.
 | project
     TimeGenerated,
