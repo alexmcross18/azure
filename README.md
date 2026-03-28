@@ -1,6 +1,6 @@
 # Security Detection Engineering & Automation (Azure)
 
-> A reference library of KQL detection rules, Azure infrastructure templates, and security automation built on the Microsoft security stack. This is the engineering workbench behind the [CI/CD pipeline repo](https://github.com/your-username/infrastructure-and-detection-as-code-CI-CD-pipeline) — detections and infrastructure are developed and documented here before being operationalised there.
+> A reference library of KQL detection rules, Azure infrastructure templates, and security automation built on the Microsoft security stack. This is the engineering workbench behind the [CI/CD pipeline repo](https://github.com/alexmcross18/infrastructure-and-detection-as-code-CI-CD-pipeline) — detections and infrastructure are developed and documented here before being operationalised there.
 
 ---
 
@@ -36,8 +36,9 @@ Nothing here requires a CI/CD pipeline to use. Every file is designed to be unde
 │   └── bicep/
 │       ├── Log Analytics Workspace & Sentinel Deployment.bicep  # Bicep: deploy LAW + Sentinel
 │       ├── Log Analytics Workspace & Sentinel Deployment.md     # Docs: deployment instructions
-│       ├── Enabling Entra ID Logs.bicep                         # Bicep: configure AAD diagnostic settings
-│       └── Enabling Entra ID Logs.md                            # Docs: log categories, deployment guide
+│       ├── Enabling Entra ID Logs.bicep                         # Bicep: configure Entra ID diagnostic settings
+│       ├── Enabling Entra ID Logs.md                            # Docs: log categories, deployment guide
+│       └── Watchlist Creation.bicep                             # Bicep: deploy Sentinel watchlist
 │
 └── automation/
     └── logic-apps/
@@ -51,10 +52,10 @@ Nothing here requires a CI/CD pipeline to use. Every file is designed to be unde
 
 ## Detection Rules (`/detections`)
 
-Each detection is organised by MITRE ATT&CK tactic and ships as a pair: a `.kql` file containing the raw query, and a `.md` file documenting the threat context, dependencies, false positive guidance, and tuning approach. The detections in this folder have been ported into ARM templates and deployed via the CI/CD pipeline repo.
+Each detection is organised by MITRE ATT&CK tactic and ships as a pair: a `.kql` file containing the raw query, and a `.md` file documenting the threat context, dependencies, false positive guidance, and tuning approach. The detections in this folder have been exported as ARM templates and deployed via the CI/CD pipeline repo.
 
 ### Unauthorised Web Browsers
-**Path:** `detections/defence-evasion/`  
+**Path:** `detections/defence-evasion/`
 **MITRE:** Defense Evasion — T1564
 
 Detects the execution of browsers not approved by the organisation across three MDE tables — `DeviceProcessEvents`, `DeviceEvents`, and `DeviceNetworkEvents` — then unions the results and summarises by device and account, with first/last seen timestamps and an event count. Covering three tables closes the gap where a browser might be launched in a way that only appears in one of them.
@@ -66,7 +67,7 @@ Browsers to monitor are defined in a `let browsers = dynamic([...])` list at the
 ---
 
 ### Emails Containing Suspicious TLDs
-**Path:** `detections/initial-access/`  
+**Path:** `detections/initial-access/`
 **MITRE:** Initial Access
 
 Searches `EmailUrlInfo` for delivered emails containing URLs whose domain ends in a high-abuse TLD (`.zip`, `.mov`, `.cfd`, `.quest`, `.cam`, `.fin`, `.llc`, `.vip`, `.gq`, `.tk`). Results are enriched with email metadata from `EmailEvents` and click data from `UrlClickEvents`, giving the analyst visibility into whether a recipient actually followed the link.
@@ -78,7 +79,7 @@ Additional enrichment includes SPF, DKIM, and DMARC parsed into discrete columns
 ---
 
 ### Sign-In from Unusual Location
-**Path:** `detections/initial-access/`  
+**Path:** `detections/initial-access/`
 **MITRE:** Initial Access — T1078 (Valid Accounts)
 
 Builds a dynamic lookup of each user's last known successful sign-in country from the past 30 days using a Sentinel Watchlist (`knownLocations`), then alerts on successful sign-ins from countries not present in that list. Surfaces authentication context for triage — MFA requirement, Conditional Access policy status, client app type, and full location detail.
@@ -90,7 +91,7 @@ Builds a dynamic lookup of each user's last known successful sign-in country fro
 ---
 
 ### Bunny Loader Malware
-**Path:** `detections/persistence/`  
+**Path:** `detections/persistence/`
 **MITRE:** Persistence — T1547.001 (Boot or Logon Autostart: Registry Run Keys)
 
 Monitors `DeviceRegistryEvents` for writes to Windows Run/RunOnce registry keys where the value data points to a suspicious execution path — `AppData`, `Temp`, `ProgramData`, or common LOLBin interpreters (`powershell`, `cmd.exe`, `wscript`, `mshta`). This pattern matches how Bunny Loader writes its persistence entry, but the broad path-based logic also catches other malware families that use the same technique.
@@ -100,7 +101,7 @@ Monitors `DeviceRegistryEvents` for writes to Windows Run/RunOnce registry keys 
 ---
 
 ### User Self-Assigned Role
-**Path:** `detections/privilege-escalation/`  
+**Path:** `detections/privilege-escalation/`
 **MITRE:** Privilege Escalation — T1078.004 (Valid Accounts: Cloud Accounts)
 
 Queries `AuditLogs` for successful `Add member to role` operations where the initiating user and the target user share the same UPN — a strong indicator that a user has assigned themselves a privileged role without going through an administrator. Filters out events where either user field fails to parse (a common source of false positives in this table) and extracts the role name into its own column.
@@ -161,7 +162,7 @@ New-AzTenantDeployment -Location 'your-location' -TemplateFile 'Enabling Entra I
 
 ### Abroad Working Users — Monthly Report
 
-A scheduled Azure Logic App that runs on the 1st of every month at 01:00 AM (GMT) and produces a report of all successful sign-ins from outside Great Britain during the previous calendar month. Results are exported as a CSV and emailed to a defined recipient list. If the run fails, times out, or is skipped, a separate high-importance failure alert is sent automatically — ensuring the absence of a report is never silently missed.
+A scheduled Azure Logic App that runs on the 1st of every month at 01:00 AM (GMT) and produces a report of all successful sign-ins from outside Great Britain during the previous calendar month. Results are exported as a CSV and emailed to a defined recipient list. If the run fails, times out, or is skipped, a separate high-importance failure alert fires automatically — ensuring the absence of a report is never silently missed.
 
 **What the KQL query captures:**
 
@@ -216,7 +217,7 @@ Before deploying, update subscription ID, resource group name, Log Analytics Wor
 | Technology | Role |
 |---|---|
 | KQL | Detection query language across all Sentinel rules |
-| Azure Bicep | Infrastructure as Code for LAW, Sentinel, and Entra ID log config |
+| Azure Bicep | Infrastructure as Code for LAW, Sentinel, Entra ID log config, and watchlists |
 | ARM Templates | Logic App and additional resource deployment |
 | Microsoft Sentinel | Target SIEM for all detections |
 | Microsoft Defender for Endpoint | Data source for endpoint-based detections |
@@ -228,7 +229,7 @@ Before deploying, update subscription ID, resource group name, Log Analytics Wor
 
 ## Relationship to the CI/CD Pipeline Repo
 
-The resources have been kept as .bicep files (Log Analytics Workspace & Sentinel) and detections in this repository have been exported as ARM templates (policies, detections etc) and deployed into Azure and Sentinel via the [infrastructure-and-detection-as-code-CI-CD-pipeline](https://github.com/alexmcross18/infrastructure-and-detection-as-code-CI-CD-pipeline) repo. That repo handles automated deployment, version control, and multi-client targeting. This repo is where the resources and detection logic itself is written, documented, and maintained.
+The resources in this repository — Bicep infrastructure templates, KQL detection logic — are developed and documented here, then operationalised in the [infrastructure-and-detection-as-code-CI-CD-pipeline](https://github.com/alexmcross18/infrastructure-and-detection-as-code-CI-CD-pipeline) repo. Detections are exported as ARM templates and deployed into Sentinel via automated GitHub Actions pipelines using OIDC authentication — no stored credentials required anywhere in the deployment chain.
 
 ---
 
